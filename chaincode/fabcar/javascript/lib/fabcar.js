@@ -107,7 +107,7 @@ class FabCar extends Contract {
         }
         const msg = JSON.parse(msgAsBytes.toString());
         if (!(flagger === msg.owner)) {
-            msg.owner = flagger;
+            msg.flag += 1;
         } else {
             throw new Error(`Cannot flag own message!`);
         }
