@@ -105,8 +105,11 @@ class FabCar extends Contract {
             throw new Error(`${msgNumber} does not exist`);
         }
         const msg = JSON.parse(msgAsBytes.toString());
-        msg.owner = flagger;
-
+        if (!flagger === msg.owner) {
+            msg.owner = flagger;
+        } else {
+            throw new Error(`Cannot flag own message!`);
+        }
         await ctx.stub.putState(msgNumber, Buffer.from(JSON.stringify(msg)));
         console.info('============= END : flagMsg ===========');
     }
