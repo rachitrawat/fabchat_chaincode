@@ -70,12 +70,12 @@ async function invoke() {
 		console.log(util.format("\nCreated a transaction ID: %s", tx_id.getTransactionID()));
 
 		// The fabcar chaincode is able to perform a few functions
-		//   'createCar' - requires 5 args, ex: args: ['CAR12', 'Honda', 'Accord', 'Black', 'Tom']
+		//   'createMsg' - requires 5 args, ex: args: ['CAR12', 'Honda', 'Accord', 'Black', 'Tom']
 		//   'changeCarOwner' - requires 2 args , ex: args: ['CAR10', 'Dave']
 		const proposal_request = {
 			targets: [peer],
 			chaincodeId: 'fabcar',
-			fcn: 'createCar',
+			fcn: 'createMsg',
 			args: ['CAR12', 'Honda', 'Accord', 'Black', 'Tom'],
 			chainId: 'mychannel',
 			txId: tx_id

@@ -4,7 +4,7 @@
 
 'use strict';
 
-const { FileSystemWallet, Gateway } = require('fabric-network');
+const {FileSystemWallet, Gateway} = require('fabric-network');
 const fs = require('fs');
 const path = require('path');
 
@@ -30,7 +30,7 @@ async function main() {
 
         // Create a new gateway for connecting to our peer node.
         const gateway = new Gateway();
-        await gateway.connect(ccp, { wallet, identity: 'user1', discovery: { enabled: false } });
+        await gateway.connect(ccp, {wallet, identity: 'user1', discovery: {enabled: false}});
 
         // Get the network (channel) our contract is deployed to.
         const network = await gateway.getNetwork('mychannel');
@@ -40,9 +40,10 @@ async function main() {
 
         // Evaluate the specified transaction.
         // queryCar transaction - requires 1 argument, ex: ('queryCar', 'CAR4')
-        // queryAllCars transaction - requires no arguments, ex: ('queryAllCars')
-        const result = await contract.evaluateTransaction('queryAllCars');
-        console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
+        // queryAllMsgs transaction - requires no arguments, ex: ('queryAllMsgs')
+        const result = await contract.evaluateTransaction('queryAllMsgs');
+        // console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
+        console.log(result.toString().replace(/[\\]/gi, ''));
 
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);

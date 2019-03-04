@@ -4,7 +4,7 @@
 
 'use strict';
 
-const { FileSystemWallet, Gateway } = require('fabric-network');
+const {FileSystemWallet, Gateway} = require('fabric-network');
 const fs = require('fs');
 const path = require('path');
 
@@ -30,7 +30,7 @@ async function main() {
 
         // Create a new gateway for connecting to our peer node.
         const gateway = new Gateway();
-        await gateway.connect(ccp, { wallet, identity: 'user1', discovery: { enabled: false } });
+        await gateway.connect(ccp, {wallet, identity: 'user1', discovery: {enabled: false}});
 
         // Get the network (channel) our contract is deployed to.
         const network = await gateway.getNetwork('mychannel');
@@ -39,9 +39,9 @@ async function main() {
         const contract = network.getContract('fabcar');
 
         // Submit the specified transaction.
-        // createCar transaction - requires 5 argument, ex: ('createCar', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
+        // createMsg transaction - requires 5 argument, ex: ('createMsg', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
         // changeCarOwner transaction - requires 2 args , ex: ('changeCarOwner', 'CAR10', 'Dave')
-        await contract.submitTransaction('createCar', 'CAR99', 'Honda', 'Swift', 'Rachit', 'Tom');
+        await contract.submitTransaction('createMsg', 'MSG1', 'Hi', 'Tom', '0');
         console.log('Transaction has been submitted');
 
         // Disconnect from the gateway.
