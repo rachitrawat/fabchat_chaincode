@@ -137,7 +137,7 @@ export class FabCar extends Contract {
     }
 
     public async changeCarOwner(ctx: Context, carNumber: string, newOwner: string) {
-        console.info('============= START : changeCarOwner ===========');
+        console.info('============= START : flagMsg ===========');
 
         const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
         if (!carAsBytes || carAsBytes.length === 0) {
@@ -147,7 +147,7 @@ export class FabCar extends Contract {
         car.owner = newOwner;
 
         await ctx.stub.putState(carNumber, Buffer.from(JSON.stringify(car)));
-        console.info('============= END : changeCarOwner ===========');
+        console.info('============= END : flagMsg ===========');
     }
 
 }

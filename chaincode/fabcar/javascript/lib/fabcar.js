@@ -97,18 +97,18 @@ class FabCar extends Contract {
         }
     }
 
-    async changeCarOwner(ctx, carNumber, newOwner) {
-        console.info('============= START : changeCarOwner ===========');
+    async flagMsg(ctx, msgNumber, flagger) {
+        console.info('============= START : flagMsg ===========');
 
-        const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
-        if (!carAsBytes || carAsBytes.length === 0) {
-            throw new Error(`${carNumber} does not exist`);
+        const msgAsBytes = await ctx.stub.getState(msgNumber); // get the car from chaincode state
+        if (!msgAsBytes || msgAsBytes.length === 0) {
+            throw new Error(`${msgNumber} does not exist`);
         }
-        const car = JSON.parse(carAsBytes.toString());
-        car.owner = newOwner;
+        const msg = JSON.parse(msgAsBytes.toString());
+        msg.owner = flagger;
 
-        await ctx.stub.putState(carNumber, Buffer.from(JSON.stringify(car)));
-        console.info('============= END : changeCarOwner ===========');
+        await ctx.stub.putState(msgNumber, Buffer.from(JSON.stringify(msg)));
+        console.info('============= END : flagMsg ===========');
     }
 
 }

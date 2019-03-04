@@ -71,7 +71,7 @@ async function invoke() {
 
 		// The fabcar chaincode is able to perform a few functions
 		//   'createMsg' - requires 5 args, ex: args: ['CAR12', 'Honda', 'Accord', 'Black', 'Tom']
-		//   'changeCarOwner' - requires 2 args , ex: args: ['CAR10', 'Dave']
+		//   'flagMsg' - requires 2 args , ex: args: ['CAR10', 'Dave']
 		const proposal_request = {
 			targets: [peer],
 			chaincodeId: 'fabcar',

@@ -176,7 +176,7 @@ let Chaincode = class {
   }
 
   async changeCarOwner(stub, args) {
-    console.info('============= START : changeCarOwner ===========');
+    console.info('============= START : flagMsg ===========');
     if (args.length != 2) {
       throw new Error('Incorrect number of arguments. Expecting 2');
     }
@@ -186,7 +186,7 @@ let Chaincode = class {
     car.owner = args[1];
 
     await stub.putState(args[0], Buffer.from(JSON.stringify(car)));
-    console.info('============= END : changeCarOwner ===========');
+    console.info('============= END : flagMsg ===========');
   }
 };
 
