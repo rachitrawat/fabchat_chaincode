@@ -52,9 +52,10 @@ class FabCar extends Contract {
     // }
 
 
-    async createMsg(ctx, msgNumber, msgText, owner, flag) {
+    async createMsg(ctx, msgNumber, msgText, owner) {
         console.info('============= START : Create msg ===========');
 
+        const flag = 0;
         const msg = {
             msgText,
             owner,
@@ -105,7 +106,7 @@ class FabCar extends Contract {
             throw new Error(`${msgNumber} does not exist`);
         }
         const msg = JSON.parse(msgAsBytes.toString());
-        if (!flagger === msg.owner) {
+        if (!(flagger === msg.owner)) {
             msg.owner = flagger;
         } else {
             throw new Error(`Cannot flag own message!`);
