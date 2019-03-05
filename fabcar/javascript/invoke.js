@@ -11,13 +11,13 @@ const path = require('path');
 const ccpPath = path.resolve(__dirname, '..', '..', 'basic-network', 'connection.json');
 const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
-var user;
-var choice;
+var user, choice, msg;
 
 process.argv.forEach(function (val, index, array) {
     // console.log(index + ': ' + val);
-    user = array[2];
-    choice = array[3];
+    choice = array[2];
+    msg = array[3];
+    user = array[4];
 });
 
 async function main() {
@@ -49,11 +49,11 @@ async function main() {
         // Submit the specified transaction.
         // createMsg transaction - requires 5 argument, ex: ('createMsg', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
         // flagMsg transaction - requires 2 args , ex: ('flagMsg', 'CAR10', 'Dave')
-        if (choice === 'CreateMsg') {
-            await contract.submitTransaction('createMsg', 'MSG0', 'Hi', user);
+        if (choice === 'createMsg') {
+            await contract.submitTransaction('createMsg', 'MSG0', msg, user);
             console.log(`${choice} Transaction has been submitted`);
         } else if (choice === 'flagMsg') {
-            await contract.submitTransaction('flagMsg', 'MSG0', user);
+            await contract.submitTransaction('flagMsg', msg, user);
             console.log(`${choice} Transaction has been submitted`);
         } else {
             console.log(`${choice} is invalid!`);
