@@ -44,8 +44,26 @@ class FabCar extends Contract {
     // }
 
 
-    async createMsg(ctx, msgNumber, msgText, owner) {
+    async createMsg(ctx, msgText, owner) {
         console.info('============= START : Create msg ===========');
+
+        // Assign msgID automatically
+        const startKey = '0';
+        const endKey = '999';
+        let i = 0;
+        const iterator = await ctx.stub.getStateByRange(startKey, endKey);
+
+        while (true) {
+            const res = await iterator.next();
+
+            if (res.value && res.value.value.toString()) {
+                i += 1;
+            }
+            if (res.done) {
+                await iterator.close();
+                break
+            }
+        }
 
         const flag = 0;
         const msg = {
@@ -54,7 +72,7 @@ class FabCar extends Contract {
             flag,
         };
 
-        await ctx.stub.putState(msgNumber, Buffer.from(JSON.stringify(msg)));
+        await ctx.stub.putState(i.toString(), Buffer.from(JSON.stringify(msg)));
         console.info('============= END : Create msg ===========');
     }
 
@@ -77,8 +95,8 @@ class FabCar extends Contract {
 
 
     async queryAllMsgs(ctx) {
-        const startKey = 'MSG0';
-        const endKey = 'MSG999';
+        const startKey = '0';
+        const endKey = '999';
 
         const iterator = await ctx.stub.getStateByRange(startKey, endKey);
 

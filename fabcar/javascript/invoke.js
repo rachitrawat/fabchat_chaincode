@@ -50,7 +50,7 @@ async function main() {
         // createMsg transaction - requires 5 argument, ex: ('createMsg', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
         // flagMsg transaction - requires 2 args , ex: ('flagMsg', 'CAR10', 'Dave')
         if (choice === 'createMsg') {
-            await contract.submitTransaction('createMsg', 'MSG0', msg, user);
+            await contract.submitTransaction('createMsg', msg, user);
             console.log(`${choice} Transaction has been submitted`);
         } else if (choice === 'flagMsg') {
             await contract.submitTransaction('flagMsg', msg, user);
