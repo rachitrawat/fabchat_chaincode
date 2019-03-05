@@ -41,8 +41,8 @@ async function main() {
         // Evaluate the specified transaction.
         // queryMsg transaction - requires 1 argument, ex: ('queryMsg', 'MSG0')
         // queryAllMsgs transaction - requires no arguments, ex: ('queryAllMsgs')
-        // const result = await contract.evaluateTransaction('queryAllMsgs');
-        const result = await contract.evaluateTransaction('queryMsg', 'MSG0');
+        const result = await contract.evaluateTransaction('queryAllMsgs');
+        // const result = await contract.evaluateTransaction('queryMsg', 'MSG0');
         console.log(`Transaction has been evaluated, result is: ${result.toString().replace(/[\\]/gi, '')}`);
 
     } catch (error) {
