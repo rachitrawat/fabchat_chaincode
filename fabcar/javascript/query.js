@@ -39,11 +39,11 @@ async function main() {
         const contract = network.getContract('fabcar');
 
         // Evaluate the specified transaction.
-        // queryCar transaction - requires 1 argument, ex: ('queryCar', 'CAR4')
+        // queryMsg transaction - requires 1 argument, ex: ('queryMsg', 'MSG0')
         // queryAllMsgs transaction - requires no arguments, ex: ('queryAllMsgs')
-        const result = await contract.evaluateTransaction('queryAllMsgs');
-        // console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
-        console.log(result.toString().replace(/[\\]/gi, ''));
+        // const result = await contract.evaluateTransaction('queryAllMsgs');
+        const result = await contract.evaluateTransaction('queryMsg', 'MSG0');
+        console.log(`Transaction has been evaluated, result is: ${result.toString().replace(/[\\]/gi, '')}`);
 
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);

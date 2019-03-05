@@ -5,6 +5,7 @@
 'use strict';
 
 const {Contract} = require('fabric-contract-api');
+const threshold = 5;
 
 class FabCar extends Contract {
 
@@ -25,15 +26,6 @@ class FabCar extends Contract {
         //     console.info('Added <--> ', cars[i]);
         // }
         console.info('============= END : Initialize Ledger ===========');
-    }
-
-    async queryCar(ctx, carNumber) {
-        const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
-        if (!carAsBytes || carAsBytes.length === 0) {
-            throw new Error(`${carNumber} does not exist`);
-        }
-        console.log(carAsBytes.toString());
-        return carAsBytes.toString();
     }
 
     // async createMsg(ctx, carNumber, make, model, color, owner) {
@@ -66,6 +58,24 @@ class FabCar extends Contract {
         console.info('============= END : Create msg ===========');
     }
 
+    async queryMsg(ctx, msgNumber) {
+        const msgAsBytes = await ctx.stub.getState(msgNumber); // get the msg from chaincode state
+        if (!msgAsBytes || msgAsBytes.length === 0) {
+            throw new Error(`${msgNumber} does not exist`);
+        }
+        let Record;
+        Record = JSON.parse(msgAsBytes.toString());
+
+        // don't show owner if flag < threshold
+        if (Record.flag < threshold) {
+            delete Record.owner;
+        }
+
+        // console.log(Record);
+        return JSON.stringify(Record);
+    }
+
+
     async queryAllMsgs(ctx) {
         const startKey = 'MSG0';
         const endKey = 'MSG999';
@@ -83,8 +93,8 @@ class FabCar extends Contract {
                 let Record;
                 try {
                     Record = JSON.parse(res.value.value.toString('utf8'));
-                    // don't show owner if flag < 10
-                    if (Record.flag < 10) {
+                    // don't show owner if flag < threshold
+                    if (Record.flag < threshold) {
                         delete Record.owner;
                     }
                 } catch (err) {
