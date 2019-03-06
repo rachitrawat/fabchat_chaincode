@@ -51,6 +51,7 @@ class FabCar extends Contract {
         const startKey = '0';
         const endKey = '999';
         let i = 0;
+        const flaggers = [];
         const iterator = await ctx.stub.getStateByRange(startKey, endKey);
 
         while (true) {
@@ -70,6 +71,7 @@ class FabCar extends Contract {
             msgText,
             owner,
             flag,
+            flaggers,
         };
 
         await ctx.stub.putState(i.toString(), Buffer.from(JSON.stringify(msg)));
@@ -138,11 +140,13 @@ class FabCar extends Contract {
             throw new Error(`${msgNumber} does not exist`);
         }
         const msg = JSON.parse(msgAsBytes.toString());
-        if (!(flagger === msg.owner)) {
+        if ((!(flagger === msg.owner)) && (!(msg.flaggers.includes(flagger)))) {
             msg.flag += 1;
+            msg.flaggers.push(flagger);
         } else {
-            throw new Error(`Cannot flag own message!`);
+            throw new Error(`Cannot flag message!`);
         }
+
         await ctx.stub.putState(msgNumber, Buffer.from(JSON.stringify(msg)));
         console.info('============= END : flagMsg ===========');
     }
