@@ -5,67 +5,23 @@
 'use strict';
 
 const {Contract} = require('fabric-contract-api');
-const threshold = 5;
+let ID = -1;
+let users = [];
+let numUsers = 0;
 
 class FabCar extends Contract {
 
     async initLedger(ctx) {
         console.info('============= START : Initialize Ledger ===========');
-        // const cars = [
-        //     {
-        //         color: 'Black',
-        //         make: 'Maruti',
-        //         model: 'Suzuki',
-        //         owner: 'Satoshi Nakamoto',
-        //     },
-        // ];
-        //
-        // for (let i = 0; i < cars.length; i++) {
-        //     cars[i].docType = 'car';
-        //     await ctx.stub.putState('CAR' + i, Buffer.from(JSON.stringify(cars[i])));
-        //     console.info('Added <--> ', cars[i]);
-        // }
         console.info('============= END : Initialize Ledger ===========');
     }
 
-    // async createMsg(ctx, carNumber, make, model, color, owner) {
-    //     console.info('============= START : Create Car ===========');
-    //
-    //     const car = {
-    //         color,
-    //         docType: 'car',
-    //         make,
-    //         model,
-    //         owner,
-    //     };
-    //
-    //     await ctx.stub.putState(carNumber, Buffer.from(JSON.stringify(car)));
-    //     console.info('============= END : Create Car ===========');
-    // }
-
-
     async createMsg(ctx, msgText, owner) {
-        console.info('============= START : Create msg ===========');
+        console.info('============= START : createMsg ===========');
+        console.log(`msgText: ${msgText}`);
+        console.log(`owner: ${owner}`);
 
-        // Assign msgID automatically
-        const startKey = '0';
-        const endKey = '999';
-        let i = 0;
         const flaggers = [];
-        const iterator = await ctx.stub.getStateByRange(startKey, endKey);
-
-        while (true) {
-            const res = await iterator.next();
-
-            if (res.value && res.value.value.toString()) {
-                i += 1;
-            }
-            if (res.done) {
-                await iterator.close();
-                break
-            }
-        }
-
         const flag = 0;
         const msg = {
             msgText,
@@ -74,11 +30,23 @@ class FabCar extends Contract {
             flaggers,
         };
 
-        await ctx.stub.putState(i.toString(), Buffer.from(JSON.stringify(msg)));
-        console.info('============= END : Create msg ===========');
+        // check if user is registered
+        if (!(users.includes(owner))) {
+            console.log(`${owner} registered: False`);
+            users.push(owner);
+            numUsers += 1;
+        } else {
+            console.log(`${owner} registered: True`);
+        }
+
+        ID += 1;
+
+        await ctx.stub.putState(ID.toString(), Buffer.from(JSON.stringify(msg)));
+        console.info('============= END : createMsg ===========');
     }
 
     async queryMsg(ctx, msgNumber) {
+        let threshold = Math.ceil(0.5 * numUsers);
         const msgAsBytes = await ctx.stub.getState(msgNumber); // get the msg from chaincode state
         if (!msgAsBytes || msgAsBytes.length === 0) {
             throw new Error(`${msgNumber} does not exist`);
@@ -97,6 +65,12 @@ class FabCar extends Contract {
 
 
     async queryAllMsgs(ctx) {
+        let threshold = Math.ceil(0.5 * numUsers);
+        console.info('============= START : queryAllMsgs ===========');
+        console.log(`numUsers: ${numUsers}`);
+        console.log(`users: ${users}`);
+        console.log(`threshold: ${threshold}`);
+
         const startKey = '0';
         const endKey = '999';
 
@@ -126,9 +100,9 @@ class FabCar extends Contract {
                 allResults.push({Key, Record});
             }
             if (res.done) {
-                console.log('end of data');
                 await iterator.close();
                 console.info(allResults);
+                console.info('============= END : queryAllMsgs ===========');
                 return JSON.stringify(allResults);
             }
         }
@@ -145,6 +119,7 @@ class FabCar extends Contract {
         if ((!(flagger === msg.owner)) && (!(msg.flaggers.includes(flagger)))) {
             msg.flag += 1;
             msg.flaggers.push(flagger);
+            console.log(`ID ${msgNumber} flagged by ${flagger}`);
         } else {
             throw new Error(`Cannot flag message!`);
         }
