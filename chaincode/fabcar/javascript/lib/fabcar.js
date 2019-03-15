@@ -116,7 +116,7 @@ class FabCar extends Contract {
             throw new Error(`${msgNumber} does not exist`);
         }
         const msg = JSON.parse(msgAsBytes.toString());
-        if ((!(flagger === msg.owner)) && (!(msg.flaggers.includes(flagger)))) {
+        if ((!(flagger === msg.owner)) && (!(msg.flaggers.includes(flagger))) && (users.includes(flagger))) {
             msg.flag += 1;
             msg.flaggers.push(flagger);
             console.log(`ID ${msgNumber} flagged by ${flagger}`);
