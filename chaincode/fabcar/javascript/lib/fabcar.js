@@ -117,6 +117,8 @@ class FabCar extends Contract {
                     if (Record.flag < threshold) {
                         delete Record.owner;
                     }
+                    delete Record.flag;
+                    delete Record.flaggers;
                 } catch (err) {
                     console.log(err);
                     Record = res.value.value.toString('utf8');
