@@ -11,7 +11,7 @@ const path = require('path');
 const ccpPath = path.resolve(__dirname, '..', '..', 'basic-network', 'connection.json');
 const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
-var user, choice, msg;
+let user, choice, msg;
 
 process.argv.forEach(function (val, index, array) {
     // console.log(index + ': ' + val);
