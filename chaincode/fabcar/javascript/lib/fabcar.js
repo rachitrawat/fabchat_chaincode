@@ -16,10 +16,11 @@ class FabCar extends Contract {
         console.info('============= END : Initialize Ledger ===========');
     }
 
-    async createMsg(ctx, msgText, owner) {
+    async createMsg(ctx, msgText, owner, ashokaID) {
         console.info('============= START : createMsg ===========');
         console.log(`msgText: ${msgText}`);
         console.log(`owner: ${owner}`);
+        console.log(`ashokaID: ${ashokaID}`);
 
         const flaggers = [];
         const flag = 0;
@@ -28,15 +29,14 @@ class FabCar extends Contract {
             owner,
             flag,
             flaggers,
+            ashokaID,
         };
 
-        // check if user is registered
+        // track number of users
         if (!(users.includes(owner))) {
-            console.log(`${owner} registered: False`);
+            console.log(`${owner} added to user list.`);
             users.push(owner);
             numUsers += 1;
-        } else {
-            console.log(`${owner} registered: True`);
         }
 
         ID += 1;
@@ -45,23 +45,24 @@ class FabCar extends Contract {
         console.info('============= END : createMsg ===========');
     }
 
-    async queryMsg(ctx, msgNumber) {
-        let threshold = Math.ceil(0.5 * numUsers);
-        const msgAsBytes = await ctx.stub.getState(msgNumber); // get the msg from chaincode state
-        if (!msgAsBytes || msgAsBytes.length === 0) {
-            throw new Error(`${msgNumber} does not exist`);
-        }
-        let Record;
-        Record = JSON.parse(msgAsBytes.toString());
-
-        // don't show owner if flag < threshold
-        if (Record.flag < threshold) {
-            delete Record.owner;
-        }
-
-        // console.log(Record);
-        return JSON.stringify(Record);
-    }
+    // TODO
+    // async queryMsg(ctx, msgNumber) {
+    //     let threshold = Math.ceil(0.5 * numUsers);
+    //     const msgAsBytes = await ctx.stub.getState(msgNumber); // get the msg from chaincode state
+    //     if (!msgAsBytes || msgAsBytes.length === 0) {
+    //         throw new Error(`${msgNumber} does not exist`);
+    //     }
+    //     let Record;
+    //     Record = JSON.parse(msgAsBytes.toString());
+    //
+    //     // don't show owner if flag < threshold
+    //     if (Record.flag < threshold) {
+    //         delete Record.owner;
+    //     }
+    //
+    //     // console.log(Record);
+    //     return JSON.stringify(Record);
+    // }
 
 
     async queryAllMsgs(ctx) {
@@ -90,6 +91,10 @@ class FabCar extends Contract {
                     // don't show owner if flag < threshold
                     if (Record.flag < threshold) {
                         delete Record.owner;
+                        delete Record.ashokaID;
+                    } else {
+                        Record.owner = Record.ashokaID;
+                        delete Record.ashokaID;
                     }
                     delete Record.flag;
                     delete Record.flaggers;
@@ -111,12 +116,12 @@ class FabCar extends Contract {
     async flagMsg(ctx, msgNumber, flagger) {
         console.info('============= START : flagMsg ===========');
 
-        const msgAsBytes = await ctx.stub.getState(msgNumber); // get the car from chaincode state
+        const msgAsBytes = await ctx.stub.getState(msgNumber); // get the msg from chaincode state
         if (!msgAsBytes || msgAsBytes.length === 0) {
             throw new Error(`${msgNumber} does not exist`);
         }
         const msg = JSON.parse(msgAsBytes.toString());
-        if ((!(flagger === msg.owner)) && (!(msg.flaggers.includes(flagger))) && (users.includes(flagger))) {
+        if ((!(flagger === msg.owner)) && (!(msg.flaggers.includes(flagger)))) {
             msg.flag += 1;
             msg.flaggers.push(flagger);
             console.log(`ID ${msgNumber} flagged by ${flagger}`);
