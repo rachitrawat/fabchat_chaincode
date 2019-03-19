@@ -89,7 +89,7 @@ class FabCar extends Contract {
                 try {
                     Record = JSON.parse(res.value.value.toString('utf8'));
                     // don't show owner if flag < threshold
-                    if (Record.flag < threshold) {
+                    if ((Record.flag < threshold) && (Record.flag !== -1)) {
                         delete Record.owner;
                         delete Record.ashokaID;
                     } else {
@@ -115,16 +115,21 @@ class FabCar extends Contract {
 
     async flagMsg(ctx, msgNumber, flagger) {
         console.info('============= START : flagMsg ===========');
-
+        let threshold = Math.ceil(0.5 * numUsers);
         const msgAsBytes = await ctx.stub.getState(msgNumber); // get the msg from chaincode state
         if (!msgAsBytes || msgAsBytes.length === 0) {
             throw new Error(`${msgNumber} does not exist`);
         }
         const msg = JSON.parse(msgAsBytes.toString());
         if ((!(flagger === msg.owner)) && (!(msg.flaggers.includes(flagger)))) {
-            msg.flag += 1;
+            if (msg.flag !== -1) {
+                msg.flag += 1;
+            }
             msg.flaggers.push(flagger);
             console.log(`ID ${msgNumber} flagged by ${flagger}`);
+            if (msg.flag >= threshold) {
+                msg.flag = -1;
+            }
         } else {
             throw new Error(`Cannot flag message!`);
         }
