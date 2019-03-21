@@ -88,6 +88,10 @@ class FabCar extends Contract {
                 let Record;
                 try {
                     Record = JSON.parse(res.value.value.toString('utf8'));
+                    //don't show registration $HELLO records
+                    if (Record.msgText === "$Hello") {
+                        continue;
+                    }
                     // don't show owner if flag < threshold
                     if ((Record.flag < threshold) && (Record.flag !== -1)) {
                         delete Record.owner;
