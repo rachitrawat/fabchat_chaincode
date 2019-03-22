@@ -13,6 +13,35 @@ class FabCar extends Contract {
 
     async initLedger(ctx) {
         console.info('============= START : Initialize Ledger ===========');
+
+        const startKey = '0';
+        const endKey = '999';
+
+        const iterator = await ctx.stub.getStateByRange(startKey, endKey);
+
+        while (true) {
+            const res = await iterator.next();
+
+            if (res.value && res.value.value.toString()) {
+                // console.log(res.value.value.toString('utf8'));
+                let Record;
+                try {
+                    Record = JSON.parse(res.value.value.toString('utf8'));
+                    // update numUsers count
+                    if (Record.msgText === "$Hello") {
+                        numUsers += 1;
+                    }
+                } catch (err) {
+                    console.log(err);
+                    Record = res.value.value.toString('utf8');
+                }
+            }
+            if (res.done) {
+                await iterator.close();
+                console.log(`numUsers: ${numUsers}`);
+                break;
+            }
+        }
         console.info('============= END : Initialize Ledger ===========');
     }
 
