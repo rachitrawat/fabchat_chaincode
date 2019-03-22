@@ -31,6 +31,7 @@ class FabCar extends Contract {
                     if (Record.msgText === "$Hello") {
                         numUsers += 1;
                     }
+                    ID += 1;
                 } catch (err) {
                     console.log(err);
                     Record = res.value.value.toString('utf8');
@@ -39,6 +40,7 @@ class FabCar extends Contract {
             if (res.done) {
                 await iterator.close();
                 console.log(`numUsers: ${numUsers}`);
+                console.log(`lastMsgID: ${ID}`);
                 break;
             }
         }
