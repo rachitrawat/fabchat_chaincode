@@ -156,7 +156,7 @@ class FabCar extends Contract {
             throw new Error(`${msgNumber} does not exist`);
         }
         const msg = JSON.parse(msgAsBytes.toString());
-        if ((!(flagger === msg.owner)) && (!(msg.flaggers.includes(flagger)))) {
+        if ((!(flagger === msg.owner)) && (!(msg.flaggers.includes(flagger))) && (!(msg.msgText === "$Hello"))) {
             if (msg.flag !== -1) {
                 msg.flag += 1;
             }
