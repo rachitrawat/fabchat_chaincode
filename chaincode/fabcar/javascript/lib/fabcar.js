@@ -27,8 +27,9 @@ class FabCar extends Contract {
                 let Record;
                 try {
                     Record = JSON.parse(res.value.value.toString('utf8'));
-                    // update numUsers count
+                    // update users & numUsers
                     if (Record.msgText === "$Hello") {
+                        users.push(Record.owner);
                         numUsers += 1;
                     }
                     ID += 1;
@@ -39,6 +40,7 @@ class FabCar extends Contract {
             }
             if (res.done) {
                 await iterator.close();
+                console.log(`users: ${users}`);
                 console.log(`numUsers: ${numUsers}`);
                 console.log(`lastMsgID: ${ID}`);
                 break;
@@ -63,7 +65,7 @@ class FabCar extends Contract {
             ashokaID,
         };
 
-        // track number of users
+        // track users & numUsers
         if (!(users.includes(owner))) {
             console.log(`${owner} added to user list.`);
             users.push(owner);
@@ -100,7 +102,6 @@ class FabCar extends Contract {
         let threshold = Math.ceil(0.5 * numUsers);
         console.info('============= START : queryAllMsgs ===========');
         console.log(`numUsers: ${numUsers}`);
-        console.log(`users: ${users}`);
         console.log(`threshold: ${threshold}`);
 
         const startKey = '0';
@@ -151,6 +152,10 @@ class FabCar extends Contract {
     async flagMsg(ctx, msgNumber, flagger) {
         console.info('============= START : flagMsg ===========');
         let threshold = Math.ceil(0.5 * numUsers);
+        console.log(`numUsers: ${numUsers}`);
+        console.log(`threshold: ${threshold}`);
+        console.log(`msgNumber: ${msgNumber}`);
+        console.log(`flagger: ${flagger}`);
         const msgAsBytes = await ctx.stub.getState(msgNumber); // get the msg from chaincode state
         if (!msgAsBytes || msgAsBytes.length === 0) {
             throw new Error(`${msgNumber} does not exist`);
@@ -161,7 +166,7 @@ class FabCar extends Contract {
                 msg.flag += 1;
             }
             msg.flaggers.push(flagger);
-            console.log(`ID ${msgNumber} flagged by ${flagger}`);
+            console.log(`msgID ${msgNumber} flagged by ${flagger}`);
             if (msg.flag >= threshold) {
                 msg.flag = -1;
             }
