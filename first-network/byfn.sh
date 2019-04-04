@@ -580,4 +580,4 @@ else
   exit 1
 fi
 docker rm -f $(docker ps -aq)
-docker rmi -f $(docker images | grep fabcar | awk '{print $3}')
+docker rmi -f $(docker images | grep fabchat | awk '{print $3}')
