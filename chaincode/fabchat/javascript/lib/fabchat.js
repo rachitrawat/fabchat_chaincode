@@ -78,24 +78,40 @@ class fabchat extends Contract {
         console.info('============= END : createMsg ===========');
     }
 
-    // TODO
-    // async queryMsg(ctx, msgNumber) {
-    //     let threshold = Math.ceil(0.5 * numUsers);
-    //     const msgAsBytes = await ctx.stub.getState(msgNumber); // get the msg from chaincode state
-    //     if (!msgAsBytes || msgAsBytes.length === 0) {
-    //         throw new Error(`${msgNumber} does not exist`);
-    //     }
-    //     let Record;
-    //     Record = JSON.parse(msgAsBytes.toString());
-    //
-    //     // don't show owner if flag < threshold
-    //     if (Record.flag < threshold) {
-    //         delete Record.owner;
-    //     }
-    //
-    //     // console.log(Record);
-    //     return JSON.stringify(Record);
-    // }
+    async queryMsg(ctx, msgNumber) {
+        let threshold = Math.ceil(0.5 * numUsers);
+        console.info('============= START : queryMsgByID ===========');
+        console.log(`numUsers: ${numUsers}`);
+        console.log(`threshold: ${threshold}`);
+        console.log(`msgID: ${msgNumber}`);
+
+        const msgAsBytes = await ctx.stub.getState(msgNumber); // get the msg from chaincode state
+        if (!msgAsBytes || msgAsBytes.length === 0) {
+            throw new Error(`${msgNumber} does not exist`);
+        }
+        let Record;
+        Record = JSON.parse(msgAsBytes.toString());
+
+        //don't show registration $HELLO$ records
+        if (Record.msgText === "$HELLO$") {
+            throw new Error(`${msgNumber} does not exist`);
+        }
+
+        // don't show owner if flag < threshold
+        if ((Record.flag < threshold) && (Record.flag !== -1)) {
+            delete Record.owner;
+            delete Record.ashokaID;
+        } else {
+            Record.owner = Record.ashokaID;
+            delete Record.ashokaID;
+        }
+        delete Record.flag;
+        delete Record.flaggers;
+
+        console.log(Record);
+        console.info('============= END : queryMsgByID ===========');
+        return JSON.stringify(Record);
+    }
 
 
     async queryAllMsgs(ctx) {

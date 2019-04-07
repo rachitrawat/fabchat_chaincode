@@ -11,6 +11,12 @@ const path = require('path');
 const ccpPath = path.resolve(__dirname, '..', '..', 'basic-network', 'connection.json');
 const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
+let msgID;
+
+process.argv.forEach(function (val, index, array) {
+    // console.log(index + ': ' + val);
+    msgID = array[2];
+});
 
 async function main() {
     try {
@@ -41,9 +47,13 @@ async function main() {
         // Evaluate the specified transaction.
         // queryMsg transaction - requires 1 argument, ex: ('queryMsg', 'MSG0')
         // queryAllMsgs transaction - requires no arguments, ex: ('queryAllMsgs')
-        const result = await contract.evaluateTransaction('queryAllMsgs');
-        // const result = await contract.evaluateTransaction('queryMsg', 'MSG0');
-        console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
+        if (msgID === "-1") {
+            const result = await contract.evaluateTransaction('queryAllMsgs');
+            console.log(`TransactionTypeAll has been evaluated, result is: ${result.toString()}`);
+        } else {
+            const result = await contract.evaluateTransaction('queryMsg', msgID);
+            console.log(`TransactionTypeID has been evaluated, result is: ${result.toString()}`);
+        }
 
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);
