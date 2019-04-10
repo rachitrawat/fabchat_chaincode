@@ -11,10 +11,15 @@ const path = require('path');
 const ccpPath = path.resolve(__dirname, '..', '..', 'basic-network', 'connection.json');
 const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
-const users = ["user1", "user2", "user3", "user4", "user5", "user6", "user7", "user8", "user9", "user10"];
+
+let users = new Array(100);
+
+for (let i = 1; i < users.length; i++) {
+    users[i] = "user".concat(i.toString());
+}
 
 async function main() {
-    for (let i = 0; i < users.length; i++) {
+    for (let i = 1; i < users.length; i++) {
 
         try {
 
