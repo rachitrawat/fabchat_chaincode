@@ -579,5 +579,8 @@ else
   printHelp
   exit 1
 fi
+
 docker rm -f $(docker ps -aq)
 docker rmi -f $(docker images | grep fabchat | awk '{print $3}')
+# remove wallets
+rm -rf ../fabchat/javascript/wallet
