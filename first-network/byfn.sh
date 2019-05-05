@@ -583,4 +583,4 @@ fi
 docker rm -f $(docker ps -aq)
 docker rmi -f $(docker images | grep fabchat | awk '{print $3}')
 # remove wallets
-rm -rf ../fabchat/javascript/wallet
+rm -rf /home/r/PycharmProjects/flask_chat_server/wallet

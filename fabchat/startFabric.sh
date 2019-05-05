@@ -50,5 +50,5 @@ sleep 10
 docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n fabchat -c '{"function":"initLedger","Args":[]}'
 
 # enroll admin
-cd ../fabchat/javascript
-node enrollAdmin.js
+cd /home/r/PycharmProjects/flask_chat_server
+node /home/r/WebstormProjects/hyperledger_project/fabchat/javascript/enrollAdmin.js
