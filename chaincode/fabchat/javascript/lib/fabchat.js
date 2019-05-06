@@ -15,7 +15,7 @@ class fabchat extends Contract {
         console.info('============= START : Initialize Ledger ===========');
 
         const startKey = '0';
-        const endKey = '999';
+        const endKey = '99999';
 
         const iterator = await ctx.stub.getStateByRange(startKey, endKey);
 
@@ -121,7 +121,7 @@ class fabchat extends Contract {
         console.log(`threshold: ${threshold}`);
 
         const startKey = '0';
-        const endKey = '9999';
+        const endKey = '99999';
 
         const iterator = await ctx.stub.getStateByRange(startKey, endKey);
 
