@@ -5,11 +5,14 @@
 'use strict';
 
 const {Contract} = require('fabric-contract-api');
-let ID = -1;
-let users = [];
-let numUsers = 0;
+const ClientIdentity = require('fabric-shim').ClientIdentity;
 
-class fabchat extends Contract {
+// msgID of last msg that was posted
+let msgID = -1;
+// list of users
+let users = [];
+
+class FabChat extends Contract {
 
     async initLedger(ctx) {
         console.info('============= START : Initialize Ledger ===========');
@@ -24,101 +27,101 @@ class fabchat extends Contract {
 
             if (res.value && res.value.value.toString()) {
                 // console.log(res.value.value.toString('utf8'));
-                let Record;
+                let msg;
                 try {
-                    Record = JSON.parse(res.value.value.toString('utf8'));
-                    // update users & numUsers
-                    if (Record.msgText === "$HELLO$") {
-                        users.push(Record.owner);
-                        numUsers += 1;
+                    msg = JSON.parse(res.value.value.toString('utf8'));
+
+                    // update users array and msgID
+                    if (msg.msgText === "$HELLO$") {
+                        users.push(msg.userID);
                     }
-                    ID += 1;
+
+                    msgID += 1;
+
                 } catch (err) {
                     console.log(err);
-                    Record = res.value.value.toString('utf8');
+                    msg = res.value.value.toString('utf8');
                 }
             }
+
             if (res.done) {
                 await iterator.close();
                 console.log(`users: ${users}`);
-                console.log(`numUsers: ${numUsers}`);
-                console.log(`lastMsgID: ${ID}`);
+                console.log(`numUsers: ${users.length}`);
+                console.log(`lastMsgID: ${msgID}`);
                 break;
             }
         }
         console.info('============= END : Initialize Ledger ===========');
     }
 
-    async createMsg(ctx, msgText, owner, ashokaID) {
+    async createMsg(ctx, msgText, emailID) {
         console.info('============= START : createMsg ===========');
-        console.log(`msgText: ${msgText}`);
-        console.log(`owner: ${owner}`);
-        console.log(`ashokaID: ${ashokaID}`);
+
+        let cid = new ClientIdentity(ctx.stub);
+        let userID = cid.getID();
+
+        console.log(`msgText : ${msgText}`);
+        console.log(`userID  : ${userID}`);
+        console.log(`emailID : ${emailID}`);
 
         const flaggers = [];
         const flag = 0;
+
         const msg = {
             msgText,
-            owner,
+            userID,
             flag,
             flaggers,
-            ashokaID,
+            emailID,
         };
 
-        // track users & numUsers
-        if (!(users.includes(owner))) {
-            console.log(`${owner} added to user list.`);
-            users.push(owner);
-            numUsers += 1;
+        // if new user, add user to users array
+        if (!(users.includes(userID))) {
+            console.log(`New user! Added to users array.`);
+            users.push(userID);
         }
 
-        ID += 1;
+        msgID += 1;
 
-        await ctx.stub.putState(ID.toString(), Buffer.from(JSON.stringify(msg)));
+        await ctx.stub.putState(msgID.toString(), Buffer.from(JSON.stringify(msg)));
         console.info('============= END : createMsg ===========');
     }
 
-    async queryMsg(ctx, msgNumber) {
-        let threshold = Math.ceil(0.5 * numUsers);
+    async queryMsg(ctx, msgID) {
         console.info('============= START : queryMsgByID ===========');
-        console.log(`numUsers: ${numUsers}`);
-        console.log(`threshold: ${threshold}`);
-        console.log(`msgID: ${msgNumber}`);
+        console.log(`msgID: ${msgID}`);
 
-        const msgAsBytes = await ctx.stub.getState(msgNumber); // get the msg from chaincode state
+        const msgAsBytes = await ctx.stub.getState(msgID); // get the msg from chaincode state
         if (!msgAsBytes || msgAsBytes.length === 0) {
-            throw new Error(`${msgNumber} does not exist`);
+            throw new Error(`${msgID} does not exist`);
         }
-        let Record;
-        Record = JSON.parse(msgAsBytes.toString());
+        let msg;
+        msg = JSON.parse(msgAsBytes.toString());
 
-        //don't show registration $HELLO$ records
-        if (Record.msgText === "$HELLO$") {
-            throw new Error(`${msgNumber} does not exist`);
+        // don't show registration $HELLO$ records
+        if (msg.msgText === "$HELLO$") {
+            throw new Error(`${msgID} does not exist`);
         }
 
-        // don't show owner if flag < threshold
-        if ((Record.flag < threshold) && (Record.flag !== -1)) {
-            delete Record.owner;
-            delete Record.ashokaID;
-        } else {
-            Record.owner = Record.ashokaID;
-            delete Record.ashokaID;
+        // don't show email ID if flag is not -1
+        if (msg.flag !== -1) {
+            delete msg.emailID;
         }
-        delete Record.flag;
-        delete Record.flaggers;
 
-        console.log(Record);
+        // no need to show these fields anyway
+        delete msg.flag;
+        delete msg.flaggers;
+        delete msg.userID;
+
+        console.log(msg);
         console.info('============= END : queryMsgByID ===========');
-        return JSON.stringify(Record);
+        return JSON.stringify(msg);
     }
 
 
     async queryAllMsgs(ctx) {
-        let threshold = Math.ceil(0.5 * numUsers);
         console.info('============= START : queryAllMsgs ===========');
-        console.log(`numUsers: ${numUsers}`);
-        console.log(`threshold: ${threshold}`);
 
         const startKey = '0';
         const endKey = '99999';
@@ -133,28 +136,30 @@ class fabchat extends Contract {
                 // console.log(res.value.value.toString('utf8'));
 
                 const Key = res.value.key;
-                let Record;
+                let msg;
                 try {
-                    Record = JSON.parse(res.value.value.toString('utf8'));
-                    //don't show registration $HELLO$ records
-                    if (Record.msgText === "$HELLO$") {
+                    msg = JSON.parse(res.value.value.toString('utf8'));
+
+                    // don't show registration $HELLO$ records
+                    if (msg.msgText === "$HELLO$") {
                         continue;
                     }
-                    // don't show owner if flag < threshold
-                    if ((Record.flag < threshold) && (Record.flag !== -1)) {
-                        delete Record.owner;
-                        delete Record.ashokaID;
-                    } else {
-                        Record.owner = Record.ashokaID;
-                        delete Record.ashokaID;
+
+                    // don't show email ID if flag is not -1
+                    if (msg.flag !== -1) {
+                        delete msg.emailID;
                     }
-                    delete Record.flag;
-                    delete Record.flaggers;
+
+                    // no need to show these fields anyway
+                    delete msg.userID;
+                    delete msg.flag;
+                    delete msg.flaggers;
+
                 } catch (err) {
                     console.log(err);
-                    Record = res.value.value.toString('utf8');
+                    msg = res.value.value.toString('utf8');
                 }
-                allResults.push({Key, Record});
+                allResults.push({Key, msg});
             }
             if (res.done) {
                 await iterator.close();
@@ -165,35 +170,53 @@ class fabchat extends Contract {
         }
     }
 
-    async flagMsg(ctx, msgNumber, flagger) {
+    async flagMsg(ctx, msgID) {
         console.info('============= START : flagMsg ===========');
-        let threshold = Math.ceil(0.5 * numUsers);
-        console.log(`numUsers: ${numUsers}`);
+
+        let cid = new ClientIdentity(ctx.stub);
+        let flagger = cid.getID();
+        let threshold = Math.ceil(0.5 * users.length);
+
+        console.log(`numUsers: ${users.length}`);
         console.log(`threshold: ${threshold}`);
-        console.log(`msgNumber: ${msgNumber}`);
-        console.log(`flagger: ${flagger}`);
-        const msgAsBytes = await ctx.stub.getState(msgNumber); // get the msg from chaincode state
+        console.log(`msgID: ${msgID}`);
+        console.log(`flagger  : ${flagger}`);
+
+        const msgAsBytes = await ctx.stub.getState(msgID); // get the msg from chaincode state
         if (!msgAsBytes || msgAsBytes.length === 0) {
-            throw new Error(`${msgNumber} does not exist`);
+            throw new Error(`${msgID} does not exist`);
         }
         const msg = JSON.parse(msgAsBytes.toString());
-        if ((!(flagger === msg.owner)) && (!(msg.flaggers.includes(flagger))) && (!(msg.msgText === "$HELLO$"))) {
-            if (msg.flag !== -1) {
-                msg.flag += 1;
-            }
+
+        /* flag only if:
+			1. flagger is not trying to flag its own msg
+			2. flagger has not already flagged the msg
+			3. flagger is not trying to flag $HELLO$ msgs
+			4. flagger is not trying to flag a msg with flag = -1
+        */
+        if ((flagger !== msg.userID) && !(msg.flaggers.includes(flagger)) && (msg.msgText !== "$HELLO$") && (msg.flag !== -1)) {
+
+            // push new flagger in flaggers array
             msg.flaggers.push(flagger);
-            console.log(`msgID ${msgNumber} flagged by ${flagger}`);
+            // increment flag
+            msg.flag += 1;
+
+            console.log(`msgID ${msgID} flagged successfully!`);
+
+            // if flag count reaches threshold, set flag = -1
             if (msg.flag >= threshold) {
                 msg.flag = -1;
+                console.log(`msgID ${msgID} flag count has now reached threshold!`);
             }
+
         } else {
             throw new Error(`Cannot flag message!`);
         }
 
-        await ctx.stub.putState(msgNumber, Buffer.from(JSON.stringify(msg)));
+        await ctx.stub.putState(msgID, Buffer.from(JSON.stringify(msg)));
         console.info('============= END : flagMsg ===========');
     }
 
 }
 
-module.exports = fabchat;
+module.exports = FabChat;

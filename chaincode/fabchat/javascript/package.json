@@ -1,7 +1,7 @@
 {
     "name": "fabchat",
     "version": "1.0.0",
-    "description": "fabchat contract implemented in JavaScript",
+    "description": "FabChat contract implemented in JavaScript",
     "main": "index.js",
     "engines": {
         "node": ">=8",

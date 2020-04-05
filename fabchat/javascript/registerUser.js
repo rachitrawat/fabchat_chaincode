@@ -14,7 +14,6 @@ const ccp = JSON.parse(ccpJSON);
 let user;
 
 process.argv.forEach(function (val, index, array) {
-    console.log(index + ': ' + val);
     user = array[2];
 });
 

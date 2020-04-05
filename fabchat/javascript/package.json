@@ -1,7 +1,7 @@
 {
     "name": "fabchat",
     "version": "1.0.0",
-    "description": "fabchat application implemented in JavaScript",
+    "description": "FabChat application implemented in JavaScript",
     "engines": {
         "node": ">=8",
         "npm": ">=5"
