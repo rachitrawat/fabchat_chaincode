@@ -8,9 +8,6 @@ const {
 } = require('fabric-contract-api');
 const ClientIdentity = require('fabric-shim').ClientIdentity;
 
-// msgID of last msg that was posted
-let msgID = 0;
-
 class FabChat extends Contract {
 
     async initLedger(ctx) {
@@ -20,51 +17,16 @@ class FabChat extends Contract {
         if (!dataAsBytes || dataAsBytes.length === 0) {
             console.log(`Users list does not exist!`);
 
-            const usrLst = [];
+            const userList = [];
+            const numMsgs = 0;
             const data = {
-                usrLst,
+                userList,
+                numMsgs,
             };
 
             await ctx.stub.putState("0".toString(), Buffer.from(JSON.stringify(data)));
-            console.log(`Created an empty users list at key 0`);
+            console.log(`Created an empty users list with key 0`);
         }
-
-
-        // const startKey = '0';
-        // const endKey = '99999';
-
-        // const iterator = await ctx.stub.getStateByRange(startKey, endKey);
-
-        // while (true) {
-        //     const res = await iterator.next();
-
-        //     if (res.value && res.value.value.toString()) {
-        //         // console.log(res.value.value.toString('utf8'));
-        //         let msg;
-        //         try {
-        //             msg = JSON.parse(res.value.value.toString('utf8'));
-
-        //             // update users array and msgID
-        //             if (msg.msgText === "$HELLO$") {
-        //                 users.push(msg.userID);
-        //             }
-
-        //             msgID += 1;
-
-        //         } catch (err) {
-        //             console.log(err);
-        //             msg = res.value.value.toString('utf8');
-        //         }
-        //     }
-
-        //     if (res.done) {
-        //         await iterator.close();
-        //         console.log(`users: ${users}`);
-        //         console.log(`numUsers: ${users.length}`);
-        //         console.log(`lastMsgID: ${msgID}`);
-        //         break;
-        //     }
-        // }
         console.log('============= END : Initialize Ledger ===========');
     }
 
@@ -84,8 +46,8 @@ class FabChat extends Contract {
             const data = JSON.parse(dataAsBytes.toString());
 
             // if new user, add user to DB
-            if (!(data.usrLst.includes(userID))) {
-                data.usrLst.push(userID);
+            if (!(data.userList.includes(userID))) {
+                data.userList.push(userID);
                 await ctx.stub.putState("0".toString(), Buffer.from(JSON.stringify(data)));
                 console.log(`New user! Added user to DB`);
             } else {
@@ -98,7 +60,7 @@ class FabChat extends Contract {
             const data = JSON.parse(dataAsBytes.toString());
 
             // check if user is in DB
-            if (!(data.usrLst.includes(userID))) {
+            if (!(data.userList.includes(userID))) {
                 throw new Error(`User not registered! Post a $HELLO$ message to register`);
             }
 
@@ -113,10 +75,14 @@ class FabChat extends Contract {
                 emailID,
             };
 
-            msgID += 1;
+            // increment numMsgs by 1
+            data.numMsgs += 1;
 
-            await ctx.stub.putState(msgID.toString(), Buffer.from(JSON.stringify(msg)));
-            console.log(`Message posted successfully!`);
+            // post msg with key numMsgs
+            await ctx.stub.putState((data.numMsgs).toString(), Buffer.from(JSON.stringify(msg)));
+            // update data
+            await ctx.stub.putState("0".toString(), Buffer.from(JSON.stringify(data)));
+            console.log(`Message posted successfully with key ${data.numMsgs} !`);
         }
 
         console.log('============= END : createMsg ===========');
@@ -135,7 +101,7 @@ class FabChat extends Contract {
         const data = JSON.parse(dataAsBytes.toString());
 
         // check if user is in DB
-        if (!(data.usrLst.includes(userID))) {
+        if (!(data.userList.includes(userID))) {
             throw new Error(`User not registered! Post a $HELLO$ message to register`);
         }
 
@@ -175,7 +141,7 @@ class FabChat extends Contract {
         const data = JSON.parse(dataAsBytes.toString());
 
         // check if user is in DB
-        if (!(data.usrLst.includes(userID))) {
+        if (!(data.userList.includes(userID))) {
             throw new Error(`User not registered! Post a $HELLO$ message to register`);
         }
 
@@ -240,13 +206,13 @@ class FabChat extends Contract {
         const data = JSON.parse(dataAsBytes.toString());
 
         // check if flagger is in DB
-        if (!(data.usrLst.includes(flagger))) {
+        if (!(data.userList.includes(flagger))) {
             throw new Error(`User not registered! Post a $HELLO$ message to register`);
         }
 
-        const threshold = Math.ceil(0.5 * data.usrLst.length);
+        const threshold = Math.ceil(0.5 * data.userList.length);
 
-        console.log(`numUsers: ${data.usrLst.length}`);
+        console.log(`numUsers: ${data.userList.length}`);
         console.log(`threshold: ${threshold}`);
 
         const msgAsBytes = await ctx.stub.getState(msgID); // get the msg from chaincode state
