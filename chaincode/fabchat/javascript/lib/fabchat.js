@@ -1,108 +1,151 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  */
-
 'use strict';
 
-const {Contract} = require('fabric-contract-api');
+const {
+    Contract
+} = require('fabric-contract-api');
 const ClientIdentity = require('fabric-shim').ClientIdentity;
 
 // msgID of last msg that was posted
-let msgID = -1;
-// list of users
-let users = [];
+let msgID = 0;
 
 class FabChat extends Contract {
 
     async initLedger(ctx) {
-        console.info('============= START : Initialize Ledger ===========');
+        console.log('============= START : Initialize Ledger ===========');
 
-        const startKey = '0';
-        const endKey = '99999';
+        const dataAsBytes = await ctx.stub.getState("0"); // get the users data from chaincode state
+        if (!dataAsBytes || dataAsBytes.length === 0) {
+            console.log(`Users list does not exist!`);
 
-        const iterator = await ctx.stub.getStateByRange(startKey, endKey);
+            const usrLst = [];
+            const data = {
+                usrLst,
+            };
 
-        while (true) {
-            const res = await iterator.next();
-
-            if (res.value && res.value.value.toString()) {
-                // console.log(res.value.value.toString('utf8'));
-                let msg;
-                try {
-                    msg = JSON.parse(res.value.value.toString('utf8'));
-
-                    // update users array and msgID
-                    if (msg.msgText === "$HELLO$") {
-                        users.push(msg.userID);
-                    }
-
-                    msgID += 1;
-
-                } catch (err) {
-                    console.log(err);
-                    msg = res.value.value.toString('utf8');
-                }
-            }
-
-            if (res.done) {
-                await iterator.close();
-                console.log(`users: ${users}`);
-                console.log(`numUsers: ${users.length}`);
-                console.log(`lastMsgID: ${msgID}`);
-                break;
-            }
+            await ctx.stub.putState("0".toString(), Buffer.from(JSON.stringify(data)));
+            console.log(`Created an empty users list at key 0`);
         }
-        console.info('============= END : Initialize Ledger ===========');
+
+
+        // const startKey = '0';
+        // const endKey = '99999';
+
+        // const iterator = await ctx.stub.getStateByRange(startKey, endKey);
+
+        // while (true) {
+        //     const res = await iterator.next();
+
+        //     if (res.value && res.value.value.toString()) {
+        //         // console.log(res.value.value.toString('utf8'));
+        //         let msg;
+        //         try {
+        //             msg = JSON.parse(res.value.value.toString('utf8'));
+
+        //             // update users array and msgID
+        //             if (msg.msgText === "$HELLO$") {
+        //                 users.push(msg.userID);
+        //             }
+
+        //             msgID += 1;
+
+        //         } catch (err) {
+        //             console.log(err);
+        //             msg = res.value.value.toString('utf8');
+        //         }
+        //     }
+
+        //     if (res.done) {
+        //         await iterator.close();
+        //         console.log(`users: ${users}`);
+        //         console.log(`numUsers: ${users.length}`);
+        //         console.log(`lastMsgID: ${msgID}`);
+        //         break;
+        //     }
+        // }
+        console.log('============= END : Initialize Ledger ===========');
     }
 
     async createMsg(ctx, msgText, emailID) {
-        console.info('============= START : createMsg ===========');
+        console.log('============= START : createMsg ===========');
 
         let cid = new ClientIdentity(ctx.stub);
-        let userID = cid.getID();
+        const userID = cid.getID();
 
         console.log(`msgText : ${msgText}`);
         console.log(`userID  : ${userID}`);
         console.log(`emailID : ${emailID}`);
 
-        const flaggers = [];
-        const flag = 0;
+        if (msgText === "$HELLO$") {
+            console.log(`Received user registration request!`);
+            const dataAsBytes = await ctx.stub.getState("0"); // get the users data from chaincode state
+            const data = JSON.parse(dataAsBytes.toString());
 
-        const msg = {
-            msgText,
-            userID,
-            flag,
-            flaggers,
-            emailID,
-        };
+            // if new user, add user to DB
+            if (!(data.usrLst.includes(userID))) {
+                data.usrLst.push(userID);
+                await ctx.stub.putState("0".toString(), Buffer.from(JSON.stringify(data)));
+                console.log(`New user! Added user to DB`);
+            } else {
+                throw new Error(`User already registered!`);
+            }
 
-        // if new user, add user to users array
-        if (!(users.includes(userID))) {
-            console.log(`New user! Added to users array.`);
-            users.push(userID);
+        } else {
+
+            const dataAsBytes = await ctx.stub.getState("0"); // get the users data from chaincode state
+            const data = JSON.parse(dataAsBytes.toString());
+
+            // check if user is in DB
+            if (!(data.usrLst.includes(userID))) {
+                throw new Error(`User not registered! Post a $HELLO$ message to register`);
+            }
+
+            const flaggers = [];
+            const flag = 0;
+
+            const msg = {
+                msgText,
+                userID,
+                flag,
+                flaggers,
+                emailID,
+            };
+
+            msgID += 1;
+
+            await ctx.stub.putState(msgID.toString(), Buffer.from(JSON.stringify(msg)));
+            console.log(`Message posted successfully!`);
         }
 
-        msgID += 1;
-
-        await ctx.stub.putState(msgID.toString(), Buffer.from(JSON.stringify(msg)));
-        console.info('============= END : createMsg ===========');
+        console.log('============= END : createMsg ===========');
     }
 
     async queryMsg(ctx, msgID) {
-        console.info('============= START : queryMsgByID ===========');
+        console.log('============= START : queryMsgByID ===========');
+
+        let cid = new ClientIdentity(ctx.stub);
+        const userID = cid.getID();
+
         console.log(`msgID: ${msgID}`);
+        console.log(`userID  : ${userID}`);
+
+        const dataAsBytes = await ctx.stub.getState("0"); // get the users data from chaincode state
+        const data = JSON.parse(dataAsBytes.toString());
+
+        // check if user is in DB
+        if (!(data.usrLst.includes(userID))) {
+            throw new Error(`User not registered! Post a $HELLO$ message to register`);
+        }
 
         const msgAsBytes = await ctx.stub.getState(msgID); // get the msg from chaincode state
-        if (!msgAsBytes || msgAsBytes.length === 0) {
-            throw new Error(`${msgID} does not exist`);
+        if (!msgAsBytes || msgAsBytes.length === 0 || msgID < 1) {
+            throw new Error(`msgID ${msgID} does not exist`);
         }
+
         let msg;
         msg = JSON.parse(msgAsBytes.toString());
-
-        // don't show registration $HELLO$ records
-        if (msg.msgText === "$HELLO$") {
-            throw new Error(`${msgID} does not exist`);
-        }
 
         // don't show email ID if flag is not -1
         if (msg.flag !== -1) {
@@ -115,15 +158,28 @@ class FabChat extends Contract {
         delete msg.userID;
 
         console.log(msg);
-        console.info('============= END : queryMsgByID ===========');
+        console.log('============= END : queryMsgByID ===========');
         return JSON.stringify(msg);
     }
 
 
     async queryAllMsgs(ctx) {
-        console.info('============= START : queryAllMsgs ===========');
+        console.log('============= START : queryAllMsgs ===========');
 
-        const startKey = '0';
+        let cid = new ClientIdentity(ctx.stub);
+        const userID = cid.getID();
+
+        console.log(`userID  : ${userID}`);
+
+        const dataAsBytes = await ctx.stub.getState("0"); // get the users data from chaincode state
+        const data = JSON.parse(dataAsBytes.toString());
+
+        // check if user is in DB
+        if (!(data.usrLst.includes(userID))) {
+            throw new Error(`User not registered! Post a $HELLO$ message to register`);
+        }
+
+        const startKey = '1';
         const endKey = '99999';
 
         const iterator = await ctx.stub.getStateByRange(startKey, endKey);
@@ -137,13 +193,9 @@ class FabChat extends Contract {
 
                 const Key = res.value.key;
                 let msg;
+
                 try {
                     msg = JSON.parse(res.value.value.toString('utf8'));
-
-                    // don't show registration $HELLO$ records
-                    if (msg.msgText === "$HELLO$") {
-                        continue;
-                    }
 
                     // don't show email ID if flag is not -1
                     if (msg.flag !== -1) {
@@ -159,42 +211,57 @@ class FabChat extends Contract {
                     console.log(err);
                     msg = res.value.value.toString('utf8');
                 }
-                allResults.push({Key, msg});
+
+                allResults.push({
+                    Key,
+                    msg
+                });
             }
+
             if (res.done) {
                 await iterator.close();
-                console.info(allResults);
-                console.info('============= END : queryAllMsgs ===========');
+                console.log(allResults);
+                console.log('============= END : queryAllMsgs ===========');
                 return JSON.stringify(allResults);
             }
         }
     }
 
     async flagMsg(ctx, msgID) {
-        console.info('============= START : flagMsg ===========');
+        console.log('============= START : flagMsg ===========');
 
         let cid = new ClientIdentity(ctx.stub);
-        let flagger = cid.getID();
-        let threshold = Math.ceil(0.5 * users.length);
+        const flagger = cid.getID();
 
-        console.log(`numUsers: ${users.length}`);
-        console.log(`threshold: ${threshold}`);
         console.log(`msgID: ${msgID}`);
-        console.log(`flagger  : ${flagger}`);
+        console.log(`flagger: ${flagger}`);
+
+        const dataAsBytes = await ctx.stub.getState("0"); // get the users data from chaincode state
+        const data = JSON.parse(dataAsBytes.toString());
+
+        // check if flagger is in DB
+        if (!(data.usrLst.includes(flagger))) {
+            throw new Error(`User not registered! Post a $HELLO$ message to register`);
+        }
+
+        const threshold = Math.ceil(0.5 * data.usrLst.length);
+
+        console.log(`numUsers: ${data.usrLst.length}`);
+        console.log(`threshold: ${threshold}`);
 
         const msgAsBytes = await ctx.stub.getState(msgID); // get the msg from chaincode state
-        if (!msgAsBytes || msgAsBytes.length === 0) {
-            throw new Error(`${msgID} does not exist`);
+        if (!msgAsBytes || msgAsBytes.length === 0 || msgID < 1) {
+            throw new Error(`msgID ${msgID} does not exist`);
         }
         const msg = JSON.parse(msgAsBytes.toString());
 
         /* flag only if:
 			1. flagger is not trying to flag its own msg
 			2. flagger has not already flagged the msg
-			3. flagger is not trying to flag $HELLO$ msgs
-			4. flagger is not trying to flag a msg with flag = -1
+\			3. flagger is not trying to flag a msg with flag = -1
         */
-        if ((flagger !== msg.userID) && !(msg.flaggers.includes(flagger)) && (msg.msgText !== "$HELLO$") && (msg.flag !== -1)) {
+
+        if ((flagger !== msg.userID) && !(msg.flaggers.includes(flagger)) && (msg.flag !== -1)) {
 
             // push new flagger in flaggers array
             msg.flaggers.push(flagger);
@@ -214,7 +281,7 @@ class FabChat extends Contract {
         }
 
         await ctx.stub.putState(msgID, Buffer.from(JSON.stringify(msg)));
-        console.info('============= END : flagMsg ===========');
+        console.log('============= END : flagMsg ===========');
     }
 
 }
