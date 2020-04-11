@@ -26,6 +26,8 @@ class FabChat extends Contract {
 
             await ctx.stub.putState("0".toString(), Buffer.from(JSON.stringify(data)));
             console.log(`Created an empty users list with key 0`);
+        } else {
+            console.log(`User list found!`);
         }
         console.log('============= END : Initialize Ledger ===========');
     }
