@@ -1,5 +1,5 @@
-./teardownFabChat.sh
-./startFabChat.sh
+./teardownBasic.sh
+./startBasic.sh
 gnome-terminal -- docker logs -f dev-peer0.org1.example.com-fabchat-1.0
 cd javascript
 node enrollAdmin.js
