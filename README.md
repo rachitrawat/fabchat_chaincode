@@ -1,5 +1,5 @@
 # Introduction
-**Fabchat** is a distributed chat application based on Hyperledger Fabric. It allows anyone with an email address to register and post, query or flag messages. Registered users can post text messages that are recorded as  transactions  on  the  blockchain.  Given  the  immutable property of blockchain, tampering the message database is computationally infeasible. Messages can be queried through their ID or all at once through query transactions. By default, queried messages do not  display  the  email address (identity)  of  the  owner.  However,  users  can flag a message using its msgID. If the flag count of a message reaches or exceeds half the number of users, the identity of the message owner is attached with query responses.
+**Fabchat** is a distributed chat application based on Hyperledger Fabric. It allows anyone with an email address to register and post, query or flag messages. Registered users can post text messages that are recorded as  transactions  on  the  blockchain.  Given  the  immutable property of blockchain, tampering the message database is computationally infeasible. Messages can be queried through their ID or all at once through query transactions. By default, queried messages do not  display  the  identity (email address)  of  the  owner.  However,  users  can flag a message using its msgID. If the flag count of a message reaches or exceeds half the number of users, the identity of the message owner is attached with query responses.
 
 # Background
 #### Central Logic
@@ -15,16 +15,28 @@ Uses sample network 'basic-network' which bootstraps the following instances:
 - 1 CLI
 
 #### The Asset
-An asset (key, value) is a **(msgID, msg)** pair.\
-For eg. the msg object with msgID **2** after getting flagged by **user1** looks like this:
+An asset (key, value) is a **(msgID, msg)** pair where **msg** is a javascript object.\
+For eg. Suppose **user3** post a 3rd msg with text **covid19**.  
+A **(3,msg)** pair is added to world state where **3** is the **msgID** and **msg** is a javascipt object defined as follows:
 
 | Property        | Value                         | Comment                       |
 |-----------------|-------------------------------|-------------------------------|
-| msgTex          | `covid19`                     | text of the msg               |
-| userID          | `user3*`                      | userID of the poster          |
+| msgText         | `covid19`                     | text of the msg               |
+| userID          | `user3*`                      | userID of the msg poster      |
+| flag            | `0`                           | no. of flags msg has received |
+| flaggers        | `[ ]`                  	  | users who’ve flagged the msg  |
+| emailID         | `u3@ashoka.edu.in`            | email ID of the msg poster    |
+
+
+Now suppose **user1** flags the above msg. The **msg** value corresponing to **msgID 3** will now look like:
+
+| Property        | Value                         | Comment                       |
+|-----------------|-------------------------------|-------------------------------|
+| msgText         | `covid19`                     | text of the msg               |
+| userID          | `user3*`                      | userID of the msg poster      |
 | flag            | `1`                           | no. of flags msg has received |
 | flaggers        | `[ user1* ]`                  | users who’ve flagged the msg  |
-| emailID         | `u3@ashoka.edu.in`            | email ID of the poster        |
+| emailID         | `u3@ashoka.edu.in`            | email ID of the msg poster    |
 
 > * Shortened for clarity. For eg. actual userID for **user3** looks like:
 x509::/OU=client+OU=org1+OU=department1/CN=**user3**::/C=US/ST=California/L=San Francisco/O=org1.example.com/CN=ca.org1.example.com
