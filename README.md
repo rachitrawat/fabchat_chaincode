@@ -127,4 +127,13 @@ Thus, a user cannot flag its own msg.
 $ node invoke.js flagMsg 1 user2
 ~~~~
 
+## Screenshots of complete flask based web application
+#### Dashboard page
+![alt text](https://github.com/rachitrawat/fabchat_chaincode/blob/master/screenshots/dashboard.png "Dashboard")
+
+#### Query page before flagging
+![alt text](https://github.com/rachitrawat/fabchat_chaincode/blob/master/screenshots/before_flag.png "Query before flag")
+
+#### Query page after flagging
+![alt text](https://github.com/rachitrawat/fabchat_chaincode/blob/master/screenshots/after_flag.png "Query after flag")
 
