@@ -1,10 +1,11 @@
 # Introduction
-'FabChat' is an anonymous chat application based on Hyperledger Fabric.
+**Fabchat** is a distributed chat application based on Hyperledger Fabric. It allows anyone with an email address to register and post, query or flag messages. Registered users can post text messages that are recorded as  transactions  on  the  blockchain.  Given  the  immutable property of blockchain, tampering the message database is computationally infeasible. Messages can be queried through their ID or all at once through query transactions. By default, queried messages do not  display  the  email address (identity)  of  the  owner.  However,  users  can flag a message using its msgID. If the flag count of a message reaches or exceeds half the number of users, the identity of the message owner is attached with query responses.
 
-### Key Logic
+# Background
+#### Central Logic
 A message remains anonymous unless **at least 50%** of the users flag it.
 
-### Network Configuration
+#### Network Configuration
 Uses sample network 'basic-network' which bootstraps the following instances:
 
 - 1 orderer
@@ -13,7 +14,7 @@ Uses sample network 'basic-network' which bootstraps the following instances:
 - 1 CouchDB 
 - 1 CLI
 
-### The Asset
+#### The Asset
 An asset (key, value) is a **(msgID, msg)** pair.\
 For eg. the msg object with msgID **2** after getting flagged by **user1** looks like this:
 
@@ -28,20 +29,20 @@ For eg. the msg object with msgID **2** after getting flagged by **user1** looks
 > * Shortened for clarity. For eg. actual userID for **user3** looks like:
 x509::/OU=client+OU=org1+OU=department1/CN=**user3**::/C=US/ST=California/L=San Francisco/O=org1.example.com/CN=ca.org1.example.com
 
-## Instructions
+## Running Instructions
 
-### Prerequisites
-- Install Hyperledger Fabric 
+#### Prerequisites
+- [Hyperledger Fabric v1.4.6](https://www.hyperledger.org/projects/fabric "Hyperledger Fabric")
 - Merge this repo's contents in fabric-samples dir
 
-### Setting up the network
+#### Setting up the network
 ~~~~
 $ cd fabric-samples/fabchat
 $ ./teardownBasic.sh
 $ ./startBasic.sh
 ~~~~
 
-### Running Client Application 
+#### Running Client Application 
 1. Change dir \
 `$ cd fabric-samples/fabchat/javascript`
 
@@ -70,9 +71,9 @@ $ node invoke.js createMsg '$HELLO$' user3 u3@ashoka.edu.in
 
 	General usage:   `$ node invoke.js createMsg <msgText> <userID> <emailID>`
 ~~~~
-    $ node invoke.js createMsg hello user1 u1@ashoka.edu.in
-    $ node invoke.js createMsg welcome user2 u2@ashoka.edu.in
-    $ node invoke.js createMsg covid19 user3 u3@ashoka.edu.in
+$ node invoke.js createMsg hello user1 u1@ashoka.edu.in
+$ node invoke.js createMsg welcome user2 u2@ashoka.edu.in
+$ node invoke.js createMsg covid19 user3 u3@ashoka.edu.in
 ~~~~
 
 6. Query all messages using user1 wallet
@@ -113,3 +114,5 @@ Thus, a user cannot flag its own msg.
 ~~~~
 $ node invoke.js flagMsg 1 user2
 ~~~~
+
+
