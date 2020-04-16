@@ -90,7 +90,7 @@ $ node invoke.js createMsg covid19 user3 u3@ashoka.edu.in
 
 6. Query all messages using user1 wallet
 
-General usage:  `$ node query.js -1 <userID>`
+	General usage:  `$ node query.js -1 <userID>`
 ~~~~
 $ node query.js -1 user1
 ~~~~
