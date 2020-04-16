@@ -1,7 +1,7 @@
-# Introduction
+## Introduction
 **Fabchat** is a distributed chat application based on Hyperledger Fabric. It allows anyone with an email address to register and post, query or flag messages. Registered users can post text messages that are recorded as  transactions  on  the  blockchain.  Given  the  immutable property of blockchain, tampering the message database is computationally infeasible. Messages can be queried through their ID or all at once through query transactions. By default, queried messages do not  display  the  identity (email address)  of  the  owner.  However,  users  can flag a message using its msgID. If the flag count of a message reaches or exceeds half the number of users, the identity of the message owner is attached with query responses.
 
-# Background
+## Background
 #### Central Logic
 A message remains anonymous unless **at least 50%** of the users flag it.
 
