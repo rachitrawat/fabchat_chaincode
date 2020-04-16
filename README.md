@@ -83,7 +83,7 @@ $ node invoke.js createMsg '$HELLO$' user3 u3@ashoka.edu.in
 
 	General usage:   `$ node invoke.js createMsg <msgText> <userID> <emailID>`
 ~~~~
-$ node invoke.js createMsg hello user1 u1@ashoka.edu.in
+$ node invoke.js createMsg hello   user1 u1@ashoka.edu.in
 $ node invoke.js createMsg welcome user2 u2@ashoka.edu.in
 $ node invoke.js createMsg covid19 user3 u3@ashoka.edu.in
 ~~~~
@@ -99,32 +99,32 @@ $ node query.js -1 user1
 
 	General usage:  `$ node query.js <msgID> <userID>`
 ~~~~
-$ node query.js 2 user1
+$ node query.js 3 user1
 ~~~~
 
-9. Flag “covid19” message with msgID “2” using user1 and user2 wallet
+9. Flag “covid19” message with msgID “3” using user1 and user2 wallet
 
 	General usage:  `$ node invoke.js flagMsg <msgID> <userID>`
   ~~~~
-  $ node invoke.js flagMsg 2 user1
-  $ node invoke.js flagMsg 2 user2
+  $ node invoke.js flagMsg 3 user1
+  $ node invoke.js flagMsg 3 user2
   ~~~~
   
 10. Perform a query. The email ID of the msg poster will be revealed.
 ~~~~
-$ node query.js 2 user1
+$ node query.js 3 user1
 ~~~~
 
-11. Try to flag “covid19” message with msgID “2” again using user2 wallet. It will fail. 
+11. Try to flag “covid19” message with msgID “3” again using user2 wallet. It will fail. 
 Thus, a user cannot flag the same msg twice. 
 ~~~~
-$ node invoke.js flagMsg 2 user2
+$ node invoke.js flagMsg 3 user2
 ~~~~
 
-12. Try to flag user2’s “welcome” msg with msgID “1” using user2 wallet. It will fail. 
+12. Try to flag user2’s “welcome” msg with msgID “2” using user2 wallet. It will fail. 
 Thus, a user cannot flag its own msg. 
 ~~~~
-$ node invoke.js flagMsg 1 user2
+$ node invoke.js flagMsg 2 user2
 ~~~~
 
 ## Screenshots of complete flask based web application
@@ -134,4 +134,3 @@ $ node invoke.js flagMsg 1 user2
 #### Query page before and after flagging
 ![alt text](https://github.com/rachitrawat/fabchat_chaincode/blob/master/screenshots/before_flag.png "Query before flag")
 ![alt text](https://github.com/rachitrawat/fabchat_chaincode/blob/master/screenshots/after_flag.png "Query after flag")
-
