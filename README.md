@@ -54,6 +54,11 @@ $ ./teardownBasic.sh
 $ ./startBasic.sh
 ~~~~
 
+#### Seeing chaincode logs
+~~~~
+$ docker logs -f dev-peer0.org1.example.com-fabchat-1.0
+~~~~
+
 #### Running Client Application 
 1. Change dir \
 `$ cd fabric-samples/fabchat/javascript`
